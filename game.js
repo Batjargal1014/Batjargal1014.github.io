@@ -272,6 +272,8 @@ const UI = {
             localStorage.getItem("best")
           );
           localStorage.setItem("best", this.score.best);
+          window.parent.postMessage({ type: "score", score: this.score.best }, "*");
+
           let bs = `BEST  :     ${this.score.best}`;
           sctx.fillText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
           sctx.strokeText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
