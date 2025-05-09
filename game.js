@@ -18,6 +18,7 @@ scrn.addEventListener("click", () => {
       pipe.pipes = [];
       UI.score.curr = 0;
       SFX.played = false;
+     // hasSentScore = false;
       break;
   }
 });
@@ -264,6 +265,8 @@ const UI = {
         break;
       case state.gameOver:
         sctx.lineWidth = "2";
+          window.parent.postMessage({ type: "score", score: this.score.best }, "*");
+        
         sctx.font = "40px Squada One";
         let sc = `SCORE :     ${this.score.curr}`;
         try {
@@ -272,7 +275,7 @@ const UI = {
             localStorage.getItem("best")
           );
           localStorage.setItem("best", this.score.best);
-          window.parent.postMessage({ type: "score", score: this.score.best }, "*");
+          //window.parent.postMessage({ type: "score", score: this.score.best }, "*");
 
           let bs = `BEST  :     ${this.score.best}`;
           sctx.fillText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
