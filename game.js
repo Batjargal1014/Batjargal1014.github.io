@@ -2,6 +2,8 @@ const RAD = Math.PI / 180;
 const scrn = document.getElementById("canvas");
 const sctx = scrn.getContext("2d");
 scrn.tabIndex = 1;
+let hasSentScore = false;
+
 scrn.addEventListener("click", () => {
   switch (state.curr) {
     case state.getReady:
@@ -18,7 +20,7 @@ scrn.addEventListener("click", () => {
       pipe.pipes = [];
       UI.score.curr = 0;
       SFX.played = false;
-     hasSentScore = false;
+    hasSentScore = false;
       break;
   }
 });
@@ -41,7 +43,7 @@ scrn.onkeydown = function keyDown(e) {
         pipe.pipes = [];
         UI.score.curr = 0;
         SFX.played = false;
-        hasSentScore = false;
+       hasSentScore = false;
         break;
     }
   }
@@ -267,10 +269,7 @@ const UI = {
       case state.gameOver:
         sctx.lineWidth = "2";
      //     window.parent.postMessage({ type: "score", score: this.score.best }, "*");
-        if (!hasSentScore) {
-  window.parent.postMessage({ type: "score", score: this.score.best }, "*");
-  hasSentScore = true;
-}
+
 
         sctx.font = "40px Squada One";
         let sc = `SCORE :     ${this.score.curr}`;
@@ -281,7 +280,10 @@ const UI = {
           );
           localStorage.setItem("best", this.score.best);
           //window.parent.postMessage({ type: "score", score: this.score.best }, "*");
-
+                  if (!hasSentScore) {
+  window.parent.postMessage({ type: "score", score: this.score.best }, "*");
+  hasSentScore = true;
+}
           let bs = `BEST  :     ${this.score.best}`;
           sctx.fillText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
           sctx.strokeText(sc, scrn.width / 2 - 80, scrn.height / 2 + 0);
