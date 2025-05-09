@@ -18,7 +18,7 @@ scrn.addEventListener("click", () => {
       pipe.pipes = [];
       UI.score.curr = 0;
       SFX.played = false;
-     // hasSentScore = false;
+     hasSentScore = false;
       break;
   }
 });
@@ -41,6 +41,7 @@ scrn.onkeydown = function keyDown(e) {
         pipe.pipes = [];
         UI.score.curr = 0;
         SFX.played = false;
+        hasSentScore = false;
         break;
     }
   }
@@ -265,8 +266,12 @@ const UI = {
         break;
       case state.gameOver:
         sctx.lineWidth = "2";
-          window.parent.postMessage({ type: "score", score: this.score.best }, "*");
-        
+     //     window.parent.postMessage({ type: "score", score: this.score.best }, "*");
+        if (!hasSentScore) {
+  window.parent.postMessage({ type: "score", score: this.score.best }, "*");
+  hasSentScore = true;
+}
+
         sctx.font = "40px Squada One";
         let sc = `SCORE :     ${this.score.curr}`;
         try {
