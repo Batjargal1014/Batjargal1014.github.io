@@ -1,0 +1,129 @@
+<style>
+    .nav-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 15px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--card-bg, rgba(30, 41, 59, 0.5));
+        backdrop-filter: blur(15px);
+        border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+        z-index: 1000;
+        box-shadow: 0 4px 30px var(--shadow, rgba(0, 0, 0, 0.3));
+    }
+    .header-spacer {
+        height: 78px;
+    }
+    .logo {
+        font-size: 1.4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.5px;
+        text-decoration: none;
+    }
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        position: relative;
+    }
+    .auth-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+        background: linear-gradient(135deg, rgba(79, 172, 254, 0.2), rgba(0, 242, 254, 0.2));
+        color: var(--text-main, #f1f5f9);
+        font-weight: 800;
+        font-size: 0.82rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+        cursor: pointer;
+    }
+    .auth-btn {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .avatar-menu {
+        position: absolute;
+        right: 54px;
+        top: calc(100% + 10px);
+        display: none;
+        min-width: 170px;
+        border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+        border-radius: 12px;
+        background: var(--card-bg, rgba(30, 41, 59, 0.85));
+        backdrop-filter: blur(12px);
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
+        padding: 8px;
+        z-index: 1002;
+    }
+    .avatar-menu.open {
+        display: block;
+    }
+    .avatar-menu button {
+        width: 100%;
+        text-align: left;
+        border: 0;
+        background: transparent;
+        color: var(--text-main, #f1f5f9);
+        padding: 10px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .avatar-menu button:hover {
+        background: rgba(79, 172, 254, 0.15);
+    }
+    .theme-switch-header {
+        background: var(--bg);
+        border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--text-main, #f1f5f9);
+        transition: all 0.3s ease;
+    }
+    .theme-switch-header:hover {
+        transform: translateY(-2px);
+        border-color: var(--primary);
+    }
+    @media (max-width: 600px) {
+        .nav-header { padding: 15px 20px; }
+        .logo { font-size: 1.1rem; }
+    }
+</style>
+<nav class="nav-header">
+    <a class="logo" href="/">
+        <i class="fas fa-spell-check" style="margin-right: 8px;"></i>SpellCheckerMN
+    </a>
+    <div class="header-actions">
+        <div id="auth-status" class="auth-avatar" title="Нэвтрээгүй" style="display: none;">--</div>
+        <div id="avatar-menu" class="avatar-menu" aria-hidden="true">
+            <button id="menu-dashboard-btn" type="button">Хянах самбар</button>
+            <button id="menu-logout-btn" type="button">Гарах</button>
+        </div>
+        <button id="auth-btn" class="auth-btn" type="button">Нэвтрэх</button>
+        <div class="theme-switch-header" id="theme-toggle">
+            <i class="fas fa-sun" id="theme-icon"></i>
+        </div>
+    </div>
+</nav>
+<div class="header-spacer"></div>
