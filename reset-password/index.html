@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../spell/assets/64.png" type="image/png">
+    <title>SpellChecker MN | Нууц үг шинэчлэх</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4facfe;
+            --secondary: #00f2fe;
+            --bg: #0b1120;
+            --card-bg: rgba(30, 41, 59, 0.65);
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --shadow: rgba(0, 0, 0, 0.45);
+            --accent-red: #dc2626;
+        }
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --text-main: #1e293b;
+            --text-dim: #64748b;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Inter", "SF Pro Display", -apple-system, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(79, 172, 254, 0.15), transparent 35%),
+                radial-gradient(circle at 100% 100%, rgba(0, 242, 254, 0.15), transparent 35%),
+                var(--bg);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .reset-page {
+            width: 100%;
+            max-width: 440px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .reset-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 22px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+            padding: 30px 26px;
+            backdrop-filter: blur(10px);
+        }
+        .reset-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 18px;
+        }
+        .reset-card h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        .reset-card p {
+            color: var(--text-dim);
+            font-size: 0.92rem;
+            margin-bottom: 20px;
+        }
+        .reset-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .reset-input-wrap {
+            position: relative;
+        }
+        .reset-input {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            background: rgba(148, 163, 184, 0.12);
+            color: var(--text-main);
+            border-radius: 12px;
+            padding: 13px 44px 13px 14px;
+            outline: none;
+            font-size: 0.95rem;
+        }
+        .reset-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+        }
+        .reset-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 1.05rem;
+            padding: 6px 8px;
+            line-height: 1;
+        }
+        .reset-toggle:hover {
+            color: var(--primary);
+        }
+        .reset-submit {
+            border: none;
+            border-radius: 12px;
+            padding: 13px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            margin-top: 4px;
+        }
+        .reset-submit.loading {
+            opacity: 0.75;
+            pointer-events: none;
+        }
+        .reset-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10010;
+            color: #fff;
+            padding: 14px 20px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(-20px);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            font-size: 0.92rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 420px;
+        }
+        .reset-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reset-toast.toast-success { background: linear-gradient(135deg, #059669, #10b981); }
+        .reset-toast.toast-error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+
+        .reset-success {
+            text-align: center;
+            display: none;
+        }
+        .reset-success i {
+            font-size: 3rem;
+            color: #059669;
+            margin-bottom: 14px;
+        }
+        .reset-success h2 {
+            margin-bottom: 8px;
+        }
+        .reset-success p {
+            margin-bottom: 20px;
+        }
+        .reset-success .btn-login {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        @media (max-width: 600px) {
+            .reset-toast {
+                left: 12px;
+                right: 12px;
+                max-width: none;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div id="header-root"></div>
+
+    <main class="reset-page">
+        <div class="reset-card" id="reset-form-card">
+            <div class="reset-icon"><i class="fas fa-key"></i></div>
+            <h2>Шинэ нууц үг оруулах</h2>
+            <p>Шинэ нууц үгээ оруулж бүртгэлээ сэргээнэ үү.</p>
+            <form id="reset-form" class="reset-form">
+                <div class="reset-input-wrap">
+                    <input id="new-password" class="reset-input" type="password" placeholder="Шинэ нууц үг" minlength="6" required>
+                    <button id="toggle-new" class="reset-toggle" type="button"><i class="fas fa-eye"></i></button>
+                </div>
+                <div class="reset-input-wrap">
+                    <input id="confirm-password" class="reset-input" type="password" placeholder="Нууц үг давтах" minlength="6" required>
+                    <button id="toggle-confirm" class="reset-toggle" type="button"><i class="fas fa-eye"></i></button>
+                </div>
+                <button id="reset-submit" class="reset-submit" type="submit">Нууц үг шинэчлэх</button>
+            </form>
+        </div>
+
+        <div class="reset-card reset-success" id="reset-success">
+            <i class="fas fa-check-circle"></i>
+            <h2>Амжилттай!</h2>
+            <p>Нууц үг амжилттай шинэчлэгдлээ.</p>
+            <a class="btn-login" id="btn-go-home" href="/"> Нүүр хуудас</a>
+        </div>
+    </main>
+
+    <div id="reset-toast" class="reset-toast" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = "https://irqjecjpfktyzoflrcdt.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_9_26pSQbJ64aeYNZxTY8vA_-Rx0TNuf";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const formCard = document.getElementById("reset-form-card");
+        const successCard = document.getElementById("reset-success");
+        const resetForm = document.getElementById("reset-form");
+        const newPasswordEl = document.getElementById("new-password");
+        const confirmPasswordEl = document.getElementById("confirm-password");
+        const submitBtn = document.getElementById("reset-submit");
+        const toastEl = document.getElementById("reset-toast");
+        const btnGoHome = document.getElementById("btn-go-home");
+        let toastTimer = null;
+
+        function isFileProtocol() { return window.location.protocol === "file:"; }
+
+        if (isFileProtocol()) {
+            btnGoHome.href = "../index.html";
+        }
+
+        function getHeaderPath() {
+            return isFileProtocol() ? "../components/header.html" : "/components/header.html";
+        }
+
+        async function loadHeader() {
+            const target = document.getElementById("header-root");
+            try {
+                const res = await fetch(getHeaderPath());
+                target.innerHTML = await res.text();
+                const logoLink = target.querySelector(".logo");
+                if (logoLink) logoLink.setAttribute("href", isFileProtocol() ? "../index.html" : "/");
+
+                const themeToggle = document.getElementById("theme-toggle");
+                const themeIcon = document.getElementById("theme-icon");
+                if (themeToggle && themeIcon) {
+                    const saved = localStorage.getItem("theme");
+                    if (saved === "light") {
+                        document.body.setAttribute("data-theme", "light");
+                        themeIcon.classList.replace("fa-sun", "fa-moon");
+                    }
+                    themeToggle.addEventListener("click", () => {
+                        const next = document.body.getAttribute("data-theme") === "dark" ? "light" : "dark";
+                        document.body.setAttribute("data-theme", next);
+                        localStorage.setItem("theme", next);
+                        themeIcon.classList.toggle("fa-sun", next === "dark");
+                        themeIcon.classList.toggle("fa-moon", next === "light");
+                    });
+                }
+                const authBtn = document.getElementById("auth-btn");
+                if (authBtn) authBtn.style.display = "none";
+            } catch (_) {}
+        }
+
+        function showToast(message, type) {
+            toastEl.classList.remove("show", "toast-success", "toast-error");
+            const icon = type === "success" ? "fa-check-circle" : "fa-exclamation-circle";
+            toastEl.innerHTML = '<i class="fas ' + icon + '"></i> ' + message;
+            toastEl.classList.add("toast-" + type);
+            void toastEl.offsetWidth;
+            toastEl.classList.add("show");
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toastEl.classList.remove("show"), type === "error" ? 4000 : 3000);
+        }
+
+        function bindToggles() {
+            document.getElementById("toggle-new").addEventListener("click", function () {
+                const hidden = newPasswordEl.type === "password";
+                newPasswordEl.type = hidden ? "text" : "password";
+                this.innerHTML = hidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+            });
+            document.getElementById("toggle-confirm").addEventListener("click", function () {
+                const hidden = confirmPasswordEl.type === "password";
+                confirmPasswordEl.type = hidden ? "text" : "password";
+                this.innerHTML = hidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+            });
+        }
+
+        resetForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const pw = newPasswordEl.value;
+            const cpw = confirmPasswordEl.value;
+
+            if (pw !== cpw) {
+                showToast("Нууц үг таарахгүй байна.", "error");
+                return;
+            }
+            if (pw.length < 6) {
+                showToast("Нууц үг хамгийн багадаа 6 тэмдэгт байх ёстой.", "error");
+                return;
+            }
+
+            submitBtn.classList.add("loading");
+            submitBtn.textContent = "Шинэчилж байна...";
+
+            const { error } = await supabaseClient.auth.updateUser({ password: pw });
+
+            submitBtn.classList.remove("loading");
+            submitBtn.textContent = "Нууц үг шинэчлэх";
+
+            if (error) {
+                showToast(error.message, "error");
+                return;
+            }
+
+            formCard.style.display = "none";
+            successCard.style.display = "block";
+            showToast("Нууц үг амжилттай шинэчлэгдлээ!", "success");
+        });
+
+        async function init() {
+            await loadHeader();
+            bindToggles();
+        }
+
+        init();
+    </script>
+</body>
+</html>
