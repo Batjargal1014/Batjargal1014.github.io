@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="spell/assets/64.png" type="image/png">
+    <title>SpellChecker MN | Суулгах заавар</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- Өнгөний тохиргоо (Variables) --- */
+        :root {
+            /* Light Mode */
+            --primary: #4facfe;
+            --secondary: #00f2fe;
+            --bg: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --text-main: #1e293b;
+            --text-dim: #64748b;
+            --accent: #38bdf8;
+            --image-wrapper-bg: #e2e8f0;
+            --border-color: rgba(0, 0, 0, 0.05);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            /* Dark Mode */
+            --bg: #0b1120;
+            --card-bg: rgba(30, 41, 59, 0.5);
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
+            --image-wrapper-bg: #1e293b;
+            --border-color: rgba(255, 255, 255, 0.05);
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'SF Pro Display', -apple-system, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(79, 172, 254, 0.1) 0%, transparent 35%),
+                radial-gradient(circle at 100% 100%, rgba(0, 242, 254, 0.1) 0%, transparent 35%);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- Mode Switcher Button --- */
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px var(--shadow);
+            color: var(--text-main);
+            font-size: 1.2rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* --- Header Section --- */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .badge {
+            background: linear-gradient(90deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1));
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            color: var(--accent);
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            display: inline-block;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+
+        header p {
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* --- Download Hero --- */
+        .download-hero {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            padding: 60px 40px;
+            text-align: center;
+            margin-bottom: 120px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            padding: 22px 50px;
+            border-radius: 16px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        [data-theme="light"] .btn-download { color: #fff; }
+
+        .btn-download:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(79, 172, 254, 0.4);
+        }
+
+        /* --- Steps --- */
+        .step-section {
+            display: flex;
+            flex-direction: column;
+            gap: 150px;
+        }
+
+        .step-item {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 80px;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(60px);
+            transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .step-item.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .step-item:nth-child(even) { direction: rtl; }
+        .step-item:nth-child(even) .step-text { direction: ltr; }
+
+        .step-num-glow {
+            font-size: 1.2rem;
+            color: var(--primary);
+            width: 45px;
+            height: 45px;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tool-tag {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            color: var(--accent);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            
+        }
+
+        /* --- Image Wrapper --- */
+        .image-wrapper {
+            background: var(--image-wrapper-bg);
+            border-radius: 20px;
+            padding: 40px 15px 15px 15px;
+            box-shadow: 0 40px 80px -20px var(--shadow);
+            border: 1px solid var(--border-color);
+            position: relative;
+            cursor: pointer;
+        }
+		.image-wrapper::after {
+    content: "\f06e"; /* eye icon */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    font-size: 28px;
+    color: white;
+    background: rgba(0,0,0,0.5);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: 0.3s;
+}
+
+.image-wrapper:hover::after {
+    opacity: 1;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* --- Modal-ийг бүтэн дэлгэцээр, голлуулж харуулах --- */
+.img-modal {
+    display: none; /* JS-ээр block болно */
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9); /* Арай бараан болгож гүн харагдуулна */
+    backdrop-filter: blur(5px);
+    
+    /* Голлуулах тохиргоо */
+    display: none; 
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Modal нээгдэх үед flex болгохын тулд JS дээр display = "flex" болгоно */
+
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 100%;   /* Гар утсан дээр хажуу тийш гарахгүй */
+    max-height: 90vh;  /* Дээшээ доошоо гарахгүй */
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Хаах товчийг гар утсанд тохиромжтой болгох */
+.close {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    color: white;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10000;
+    transition: 0.3s;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+}
+
+.close:hover {
+    background: rgba(255,255,255,0.2);
+}
+        .image-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 15px; left: 20px;
+            width: 10px; height: 10px;
+            background: #ff5f56;
+            border-radius: 50%;
+            box-shadow: 18px 0 0 #ffbd2e, 36px 0 0 #27c93f;
+        }
+
+        .step-img-box {
+            width: 100%;
+            height: 350px;
+            background: var(--bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .step-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            
+           
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 900px) {
+            .step-item, .step-item:nth-child(even) { grid-template-columns: 1fr; gap: 50px; direction: ltr; }
+            header h1 { font-size: 2.5rem; }
+            .step-img-box { height: 250px; }
+        }
+        .btn-download.disabled {
+        background: #475569 !important; /* Идэвхгүй үеийн саарал өнгө */
+        cursor: not-allowed;
+        opacity: 0.8;
+        box-shadow: none !important;
+        transform: none !important;
+        pointer-events: none; /* Link-ийг hover болон click-ээс бүрэн тусгаарлана */
+    }
+
+    #btn-text {
+        font-variant-numeric: tabular-nums; /* Тоонуудыг байрнаас нь хөдөлгөхгүй */
+    }
+        .typing-text::after {
+    content: '';
+    animation: blink 0.7s infinite;
+    margin-left: 5px;
+    color: var(--primary);
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+/* Курсорын анимаци */
+.cursor {
+    border-left: 3px solid var(--primary);
+    margin-left: 2px;
+    animation: blink 0.7s infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+.misspelled {
+    text-decoration: underline red wavy;
+    text-underline-offset: 5px;
+}
+
+.corrected {
+    text-decoration: none;
+    color: var(--primary);
+    transition: color 0.3s ease;
+}
+        /* Сканнердах эффект */
+.scanner-overlay {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+}
+
+.scanner-bar {
+    position: absolute;
+    top: 0;
+    left: -100px;
+    width: 80px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    opacity: 0.5;
+    filter: blur(5px);
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* Сканнердах үеийн хөдөлгөөн */
+@keyframes scan-animation {
+    0% { left: -100px; }
+    100% { left: 100%; }
+}
+
+.scanning .scanner-bar {
+    animation: scan-animation 1.5s linear forwards;
+}
+        .nav-header {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        padding: 15px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--card-bg);
+        backdrop-filter: blur(15px);
+        border-bottom: 1px solid var(--border-color);
+        z-index: 1000;
+        box-shadow: 0 4px 30px var(--shadow);
+    }
+
+    .logo {
+        font-size: 1.4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.5px;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    .auth-status {
+        font-size: 0.9rem;
+        color: var(--text-dim);
+        max-width: 260px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .auth-btn {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .auth-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 10001;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        /* background: radial-gradient(circle at 20% 20%, rgba(79, 172, 254, 0.18), rgba(3, 8, 18, 0.84) 40%),
+                    radial-gradient(circle at 80% 80%, rgba(0, 242, 254, 0.15), rgba(3, 8, 18, 0.86) 45%); */
+        backdrop-filter: blur(10px);
+        padding: 20px;
+    }
+    .auth-modal.open {
+        display: flex;
+    }
+    .auth-card {
+        width: 100%;
+        max-width: 440px;
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.84));
+        border: 1px solid var(--border-color);
+        border-radius: 22px;
+        box-shadow: 0 24px 80px rgba(2, 8, 23, 0.45);
+        padding: 26px;
+        position: relative;
+    }
+    [data-theme="dark"] .auth-card {
+        background: linear-gradient(160deg, rgba(15, 23, 42, 0.94), rgba(30, 41, 59, 0.88));
+    }
+    .auth-title {
+        font-size: 1.35rem;
+        margin-bottom: 4px;
+        font-weight: 800;
+    }
+    .auth-subtitle {
+        color: var(--text-dim);
+        margin-bottom: 16px;
+        font-size: 0.92rem;
+    }
+    .auth-mode-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        background: rgba(100, 116, 139, 0.14);
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 14px;
+    }
+    .auth-mode-tab {
+        border: 0;
+        border-radius: 9px;
+        background: transparent;
+        color: var(--text-dim);
+        padding: 9px 10px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .auth-mode-tab.active {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: #fff;
+    }
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .auth-password-wrap {
+        position: relative;
+    }
+    .auth-input {
+        width: 100%;
+        border: 1px solid var(--border-color);
+        background: rgba(148, 163, 184, 0.12);
+        color: var(--text-main);
+        border-radius: 12px;
+        padding: 13px 14px;
+        outline: none;
+    }
+    .auth-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+    }
+    .auth-password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 0;
+        background: transparent;
+        color: var(--text-dim);
+        cursor: pointer;
+        font-size: 1.05rem;
+        padding: 6px 8px;
+        line-height: 1;
+    }
+    .auth-password-toggle:hover {
+        color: var(--primary);
+    }
+    .auth-name-wrap {
+        display: none;
+    }
+    .auth-name-wrap.visible {
+        display: block;
+    }
+    .turnstile-wrap {
+        display: flex;
+        justify-content: center;
+        min-height: 65px;
+    }
+    .auth-form-actions {
+        margin-top: 6px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .auth-submit,
+    .auth-switch {
+        border: none;
+        border-radius: 12px;
+        padding: 11px 12px;
+        cursor: pointer;
+        font-weight: 700;
+    }
+    .auth-submit {
+        flex: 1;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: #fff;
+    }
+    .auth-submit.loading {
+        opacity: 0.85;
+        pointer-events: none;
+    }
+    .auth-switch {
+        background: transparent;
+        color: var(--text-dim);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+    .auth-close {
+        margin-top: 12px;
+        width: auto;
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        border-radius: 10px;
+        padding: 6px 9px;
+        cursor: pointer;
+    }
+    .auth-forgot-link {
+        background: transparent;
+        border: none;
+        color: var(--primary);
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0;
+        text-align: right;
+        margin-top: -4px;
+    }
+    .auth-forgot-link:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+    .auth-back-link {
+        background: transparent;
+        border: none;
+        color: var(--text-dim);
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 10px;
+    }
+    .auth-back-link:hover {
+        color: var(--primary);
+    }
+    .auth-success-msg {
+        background: rgba(5, 150, 105, 0.1);
+        border: 1px solid rgba(5, 150, 105, 0.25);
+        color: #059669;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 0.88rem;
+        line-height: 1.5;
+        text-align: center;
+    }
+    [data-theme="dark"] .auth-success-msg {
+        background: rgba(5, 150, 105, 0.12);
+        color: #34d399;
+    }
+    .auth-error {
+        color: #ef4444;
+        min-height: 1.1em;
+        font-size: 0.85rem;
+    }
+    .auth-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10010;
+        color: #fff;
+        padding: 14px 20px;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        transform: translateY(-20px);
+        pointer-events: none;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        font-size: 0.92rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        max-width: 420px;
+    }
+    .auth-toast.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .auth-toast.toast-success {
+        background: linear-gradient(135deg, #059669, #10b981);
+    }
+    .auth-toast.toast-error {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+    }
+    .auth-toast.toast-info {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+    }
+    @media (max-width: 600px) {
+        .auth-toast {
+            left: 12px;
+            right: 12px;
+            max-width: none;
+            font-size: 0.85rem;
+            padding: 12px 16px;
+            border-radius: 12px;
+        }
+    }
+
+    /* Theme switch-ийг header дотор зориулж өөрчлөх */
+    .theme-switch-header {
+        background: var(--bg);
+        border: 1px solid var(--border-color);
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--text-main);
+        transition: all 0.3s ease;
+    }
+
+    .theme-switch-header:hover {
+        transform: translateY(-2px);
+        border-color: var(--primary);
+    }
+
+    /* Container-ын margin-г header-т зориулж багасгах */
+    .container {
+        padding-top: 50px;
+    }
+
+    /* Хуучин theme-switch стилийг устгах эсвэл дарах */
+    .theme-switch { display: none; } 
+
+    @media (max-width: 600px) {
+        .nav-header { padding: 15px 20px; }
+        .logo { font-size: 1.1rem; }
+    }
+    </style>
+</head>
+    
+<body data-theme="dark">
+    <div id="header-root"></div>
+
+
+    <div class="container">
+        <header>
+            <div class="badge">v1.0.0 beta</div>
+            <h1>Ашиглах заавар</h1>
+           <p id="typing-p" class="typing-text" style="min-height: 1.6em;"></p>
+        </header>
+
+       <div class="download-hero">
+            <h2 style="margin-bottom: 15px;">Хөгжүүлэлтийн хувилбар татах</h2>
+            <p style="margin-bottom: 40px; color: var(--text-dim);">Татаж аваад шууд ашиглаж эхлээрэй.</p>
+            
+            <a id="download-btn" class="btn-download disabled">
+                <i class="fas fa-lock" id="btn-icon"></i>
+                <span id="btn-text">--:--:--:-- </span>
+            </a>
+        </div>
+
+        <div class="step-section">
+            <div class="step-item">
+                <div class="step-text">
+                    <div class="step-num-glow">01</div>
+                    <h2 style="margin-top: 20px;">Программ суулгах</h2>
+                    <p>Татаж авсан файлаа ажиллуулж, ердөө 5 секундэд суулгаж дуусгана. Windows-оос анхааруулга ирвэл "Run anyway" сонгоорой.</p>
+                    <div class="tool-tag">
+                        <i class="fas fa-shield-alt"></i>
+                        More info > Run anyway > Install
+                    </div>
+                </div>
+                <div class="image-wrapper">
+                    <div class="step-img-box" title="Томруулж харах">
+                        <img src="22.gif" alt="Install" onerror="this.style.display='none'">
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-text">
+                    <div class="step-num-glow">02</div>
+                    <h2 style="margin-top: 20px;">Add-ins цэснээс нээх</h2>
+                    <p>Word-ын Home таб дээрх "Add-ins" гэсэн цэсрүү орж баруун доод буланд байрлах More Add-ins товч дарж орно. Дээд талын хэсэгт Shared folder цэсрүү орж сонгож Add дарж идэвхжүүлнэ.</p>
+                    <div class="tool-tag">
+                        <i class="fas fa-th-large"></i>
+                        Home > Add-ins > More Add-ins > Shared folder > Choose and Add
+                    </div>
+                </div>
+                <div class="image-wrapper">
+                    <div class="step-img-box" title="Томруулж харах">
+                        <img src="21.gif" alt="Add-in" onerror="this.style.display='none'">
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-text">
+                    <div class="step-num-glow">03</div>
+                    <h2 style="margin-top: 20px;">Шууд бичиж эхлэх</h2>
+                    <p>Программ ажиллаж эхэлмэгц таны бичсэн үг бүрийг хянаж, зөв хувилбарыг санал болгоно.</p>
+                    <div class="tool-tag">
+                        <i class="fas fa-check-circle"></i>
+                        Санал болгосон үг > Засах
+                    </div>
+                </div>
+                <div class="image-wrapper">
+                    <div class="step-img-box" title="Томруулж харах">
+                        <img src="3.gif" alt="Usage" onerror="this.style.display='none'">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p style="color: var(--text-dim); font-weight: 500;">© 2026 SpellCheckerMN. <script id="_waui9b">var _wau = _wau || []; _wau.push(["small", "vk3uif2p1s", "i9b"]);</script><script async src="//waust.at/s.js"></script></p>
+        </footer>
+    </div>
+    <div id="img-modal" class="img-modal">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="modal-img">
+</div>
+<div id="auth-modal" class="auth-modal" aria-hidden="true">
+    <div class="auth-card">
+        <button id="auth-close" class="auth-close" type="button">✕</button>
+        <h3 id="auth-title" class="auth-title">Нэвтрэх</h3>
+        <p id="auth-subtitle" class="auth-subtitle">Бүртгэлтэй бол нэвтэрч үргэлжлүүлнэ үү.</p>
+        <div class="auth-mode-tabs">
+            <button id="tab-login" class="auth-mode-tab active" type="button">Нэвтрэх</button>
+            <button id="tab-register" class="auth-mode-tab" type="button">Бүртгүүлэх</button>
+        </div>
+        <button id="auth-back" class="auth-back-link" type="button" style="display:none;"><i class="fas fa-arrow-left"></i> Буцах</button>
+        <form id="auth-form" class="auth-form">
+            <div id="auth-name-wrap" class="auth-name-wrap">
+                <input id="auth-name" class="auth-input" type="text" placeholder="Нэр">
+            </div>
+            <input id="auth-email" class="auth-input" type="email" placeholder="Имэйл" required>
+            <div id="auth-password-wrap" class="auth-password-wrap">
+                <input id="auth-password" class="auth-input" type="password" placeholder="Нууц үг" minlength="6" required>
+                <button id="auth-password-toggle" class="auth-password-toggle" type="button"><i class="fas fa-eye"></i></button>
+            </div>
+            <div id="auth-confirm-wrap" class="auth-name-wrap">
+                <div class="auth-password-wrap">
+                    <input id="auth-confirm-password" class="auth-input" type="password" placeholder="Нууц үг давтах" minlength="6">
+                    <button id="auth-confirm-toggle" class="auth-password-toggle" type="button"><i class="fas fa-eye"></i></button>
+                </div>
+            </div>
+            <button id="auth-forgot" class="auth-forgot-link" type="button">Нууц үг мартсан?</button>
+            <div id="turnstile-container" class="turnstile-wrap"></div>
+            <div id="auth-success" class="auth-success-msg" style="display:none;"></div>
+            <div hidden id="auth-error" class="auth-error"></div>
+            <div class="auth-form-actions">
+                <button id="auth-submit" class="auth-submit" type="submit">Нэвтрэх</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="auth-toast" class="auth-toast" aria-live="polite"></div>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script>
+const SUPABASE_URL = "https://irqjecjpfktyzoflrcdt.supabase.co";
+const SUPABASE_PUBLISHABLE_DEFAULT_KEY = "sb_publishable_9_26pSQbJ64aeYNZxTY8vA_-Rx0TNuf";
+const TURNSTILE_SITE_KEY = "0x4AAAAAACvCRfQ67aDFALB-";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_DEFAULT_KEY);
+let currentUser = null;
+let turnstileWidgetId = null;
+
+let authStatusEl = null;
+let authBtnEl = null;
+let avatarMenuEl = null;
+let menuDashboardBtnEl = null;
+let menuLogoutBtnEl = null;
+const authModalEl = document.getElementById("auth-modal");
+const authTitleEl = document.getElementById("auth-title");
+const authFormEl = document.getElementById("auth-form");
+const authEmailEl = document.getElementById("auth-email");
+const authPasswordEl = document.getElementById("auth-password");
+const authErrorEl = document.getElementById("auth-error");
+const authSubmitEl = document.getElementById("auth-submit");
+const authCloseEl = document.getElementById("auth-close");
+const authSubtitleEl = document.getElementById("auth-subtitle");
+const tabLoginEl = document.getElementById("tab-login");
+const tabRegisterEl = document.getElementById("tab-register");
+const authPasswordToggleEl = document.getElementById("auth-password-toggle");
+const authPasswordWrapEl = document.getElementById("auth-password-wrap");
+const authForgotEl = document.getElementById("auth-forgot");
+const authNameEl = document.getElementById("auth-name");
+const authNameWrapEl = document.getElementById("auth-name-wrap");
+const authConfirmPasswordEl = document.getElementById("auth-confirm-password");
+const authConfirmWrapEl = document.getElementById("auth-confirm-wrap");
+const authConfirmToggleEl = document.getElementById("auth-confirm-toggle");
+const authBackEl = document.getElementById("auth-back");
+const authSuccessEl = document.getElementById("auth-success");
+const authToastEl = document.getElementById("auth-toast");
+const DASHBOARD_PATH = "/dashboard";
+let authMode = "login";
+let authToastTimer = null;
+
+function getHeaderPath() {
+    if (window.location.protocol === "file:") {
+        return "./components/header.html";
+    }
+    return "/components/header.html";
+}
+
+async function loadHeader() {
+    const target = document.getElementById("header-root");
+    const response = await fetch(getHeaderPath());
+    target.innerHTML = await response.text();
+    const logoLink = target.querySelector(".logo");
+    if (logoLink) {
+        logoLink.setAttribute("href", window.location.protocol === "file:" ? "./index.html" : "/");
+    }
+}
+
+function updateAuthUi(user) {
+    if (user) {
+        currentUser = user;
+        const email = user.email || "";
+        const initials = email.replace(/[^a-zA-Z0-9]/g, "").slice(0, 2).toUpperCase() || "US";
+        authStatusEl.textContent = initials;
+        authStatusEl.title = email || "Нэвтэрсэн хэрэглэгч";
+        authStatusEl.style.display = "flex";
+        authBtnEl.style.display = "none";
+        menuDashboardBtnEl.style.display = "";
+        menuLogoutBtnEl.style.display = "";
+        return;
+    }
+
+    currentUser = null;
+    authStatusEl.textContent = "--";
+    authStatusEl.title = "Нэвтрээгүй";
+    authStatusEl.style.display = "none";
+    authBtnEl.textContent = "Нэвтрэх";
+    authBtnEl.style.display = "";
+    menuDashboardBtnEl.style.display = "none";
+    menuLogoutBtnEl.style.display = "none";
+    closeAvatarMenu();
+}
+
+function setAuthMode(mode) {
+    authMode = mode;
+    const isLogin = mode === "login";
+    const isForgot = mode === "forgot";
+
+    authErrorEl.textContent = "";
+    authSuccessEl.style.display = "none";
+    authSuccessEl.textContent = "";
+    authSubmitEl.disabled = false;
+    authSubmitEl.classList.remove("loading");
+
+    if (isForgot) {
+        authTitleEl.textContent = "Нууц үг сэргээх";
+        authSubtitleEl.textContent = "Бүртгэлтэй имэйл хаягаа оруулна уу.";
+        authSubmitEl.textContent = "Сэргээх имэйл илгээх";
+        authPasswordWrapEl.style.display = "none";
+        authPasswordEl.removeAttribute("required");
+        authNameWrapEl.classList.remove("visible");
+        authConfirmWrapEl.classList.remove("visible");
+        authForgotEl.style.display = "none";
+        authBackEl.style.display = "";
+        tabLoginEl.parentElement.style.display = "none";
+        return;
+    }
+
+    authPasswordWrapEl.style.display = "";
+    authPasswordEl.setAttribute("required", "");
+    authForgotEl.style.display = isLogin ? "" : "none";
+    authBackEl.style.display = "none";
+    tabLoginEl.parentElement.style.display = "";
+    authNameWrapEl.classList.toggle("visible", !isLogin);
+    authConfirmWrapEl.classList.toggle("visible", !isLogin);
+
+    authTitleEl.textContent = isLogin ? "Нэвтрэх" : "Бүртгүүлэх";
+    authSubtitleEl.textContent = isLogin
+        ? "Бүртгэлтэй бол нэвтэрч үргэлжлүүлнэ үү."
+        : "Бүртгэлгүй бол бүртгүүлж имэйл хаягаа баталгаажуулна уу.";
+    authSubmitEl.textContent = isLogin ? "Нэвтрэх" : "Бүртгүүлэх";
+    tabLoginEl.classList.toggle("active", isLogin);
+    tabRegisterEl.classList.toggle("active", !isLogin);
+}
+
+function renderTurnstile() {
+    const container = document.getElementById("turnstile-container");
+    container.innerHTML = "";
+    if (typeof turnstile !== "undefined") {
+        turnstileWidgetId = turnstile.render(container, {
+            sitekey: TURNSTILE_SITE_KEY,
+            theme: document.body.getAttribute("data-theme") === "dark" ? "dark" : "light",
+        });
+    }
+}
+
+function resetTurnstile() {
+    if (typeof turnstile !== "undefined" && turnstileWidgetId !== null) {
+        turnstile.reset(turnstileWidgetId);
+    }
+}
+
+function getCaptchaToken() {
+    if (typeof turnstile !== "undefined" && turnstileWidgetId !== null) {
+        return turnstile.getResponse(turnstileWidgetId) || "";
+    }
+    return "";
+}
+
+function openAuthModal(mode) {
+    setAuthMode(mode);
+    authModalEl.classList.add("open");
+    authModalEl.setAttribute("aria-hidden", "false");
+    renderTurnstile();
+    authEmailEl.focus();
+}
+
+function closeAuthModal() {
+    authModalEl.classList.remove("open");
+    authModalEl.setAttribute("aria-hidden", "true");
+    authFormEl.reset();
+    authErrorEl.textContent = "";
+    authSuccessEl.style.display = "none";
+    authSuccessEl.textContent = "";
+    authPasswordEl.type = "password";
+    authPasswordToggleEl.innerHTML = '<i class="fas fa-eye"></i>';
+    authNameWrapEl.classList.remove("visible");
+    authConfirmWrapEl.classList.remove("visible");
+    authConfirmPasswordEl.value = "";
+    authConfirmPasswordEl.type = "password";
+    authConfirmToggleEl.innerHTML = '<i class="fas fa-eye"></i>';
+    if (typeof turnstile !== "undefined" && turnstileWidgetId !== null) {
+        turnstile.remove(turnstileWidgetId);
+        turnstileWidgetId = null;
+    }
+}
+
+function showAuthToast(message, type = "info") {
+    if (!authToastEl) return;
+    authToastEl.classList.remove("show", "toast-success", "toast-error", "toast-info");
+
+    const icons = { success: "fa-check-circle", error: "fa-exclamation-circle", info: "fa-info-circle" };
+    authToastEl.innerHTML = '<i class="fas ' + (icons[type] || icons.info) + '"></i> ' + message;
+    authToastEl.classList.add("toast-" + type);
+
+    void authToastEl.offsetWidth;
+    authToastEl.classList.add("show");
+
+    if (authToastTimer) clearTimeout(authToastTimer);
+    authToastTimer = setTimeout(() => {
+        authToastEl.classList.remove("show");
+    }, type === "error" ? 4000 : 3000);
+}
+
+function navigateTo(path) {
+    if (window.location.protocol === "file:") {
+        window.location.href = path === "/dashboard" ? "./dashboard/index.html" : "./index.html";
+        return;
+    }
+    window.location.href = path;
+}
+
+function redirectToDashboard() {
+    navigateTo(DASHBOARD_PATH);
+}
+
+function closeAvatarMenu() {
+    if (!avatarMenuEl) return;
+    avatarMenuEl.classList.remove("open");
+    avatarMenuEl.setAttribute("aria-hidden", "true");
+}
+
+function toggleAvatarMenu() {
+    if (!avatarMenuEl || !currentUser) return;
+    const isOpen = avatarMenuEl.classList.toggle("open");
+    avatarMenuEl.setAttribute("aria-hidden", isOpen ? "false" : "true");
+}
+
+async function handleAuthButtonClick() {
+    if (!authBtnEl) return;
+    openAuthModal("login");
+}
+
+async function handleAuthSubmit(event) {
+    event.preventDefault();
+    authErrorEl.textContent = "";
+    authSuccessEl.style.display = "none";
+    const email = authEmailEl.value.trim();
+
+    const captchaToken = getCaptchaToken();
+    if (!captchaToken) {
+        showAuthToast("Captcha баталгаажуулалт хийнэ үү.", "error");
+        return;
+    }
+
+    if (authMode === "forgot") {
+        if (!email) return;
+        authSubmitEl.disabled = true;
+        authSubmitEl.classList.add("loading");
+        authSubmitEl.textContent = "Илгээж байна...";
+
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + "/reset-password",
+            captchaToken
+        });
+
+        authSubmitEl.disabled = false;
+        authSubmitEl.classList.remove("loading");
+        authSubmitEl.textContent = "Сэргээх имэйл илгээх";
+
+        if (error) {
+            showAuthToast(error.message, "error");
+            resetTurnstile();
+            return;
+        }
+
+        showAuthToast(email + " хаяг руу нууц үг сэргээх холбоос илгээлээ.", "success");
+        resetTurnstile();
+        return;
+    }
+
+    const password = authPasswordEl.value;
+    if (!email || !password) return;
+
+    if (authMode === "register") {
+        const confirmPassword = authConfirmPasswordEl.value;
+        if (password !== confirmPassword) {
+            showAuthToast("Нууц үг таарахгүй байна.", "error");
+            return;
+        }
+    }
+    authSubmitEl.disabled = true;
+    authSubmitEl.classList.add("loading");
+    authSubmitEl.textContent = authMode === "login" ? "Нэвтэрч байна..." : "Бүртгэж байна...";
+
+    let data = null;
+    let error = null;
+    if (authMode === "login") {
+        const response = await supabaseClient.auth.signInWithPassword({ email, password, options: { captchaToken } });
+        data = response.data;
+        error = response.error;
+    } else {
+        const fullName = authNameEl.value.trim();
+        const response = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: { data: { full_name: fullName }, captchaToken }
+        });
+        data = response.data;
+        error = response.error;
+    }
+
+    if (error) {
+        const msg = (error.message || "").toLowerCase();
+        if (msg.includes("email rate limit exceeded") || msg.includes("rate limit")) {
+            showAuthToast("Хэт олон удаа оролдлоо. Имэйлээ шалгаж баталгаажуулна уу.", "error");
+        } else if (msg.includes("invalid login credentials")) {
+            showAuthToast("Имэйл эсвэл нууц үг буруу байна.", "error");
+        } else if (msg.includes("email not confirmed")) {
+            showAuthToast("Имэйл хаягаа баталгаажуулна уу. Ирсэн имэйлээ шалгана уу.", "error");
+        } else {
+            showAuthToast(error.message, "error");
+        }
+        authSubmitEl.disabled = false;
+        authSubmitEl.classList.remove("loading");
+        authSubmitEl.textContent = authMode === "login" ? "Нэвтрэх" : "Бүртгүүлэх";
+        resetTurnstile();
+        return;
+    }
+
+    const user = data?.user || data?.session?.user || null;
+    const session = data?.session || null;
+
+    if (authMode === "login") {
+        if (user) {
+            updateAuthUi(user);
+            closeAuthModal();
+            showAuthToast("Амжилттай нэвтэрлээ.", "success");
+            redirectToDashboard();
+        } else {
+            showAuthToast("Нэвтрэх боломжгүй байна.", "error");
+            authSubmitEl.disabled = false;
+            authSubmitEl.classList.remove("loading");
+            authSubmitEl.textContent = "Нэвтрэх";
+            resetTurnstile();
+        }
+    } else {
+        const hasEmptyIdentities = user && Array.isArray(user.identities) && user.identities.length === 0;
+        const isOldUser = user && user.created_at && (Date.now() - new Date(user.created_at).getTime()) > 10000;
+        const isExistingUser = hasEmptyIdentities || isOldUser;
+
+        if (isExistingUser) {
+            showAuthToast("Энэ имэйл хаягаар бүртгэл аль хэдийн үүссэн байна. Нэвтрэнэ үү.", "error");
+            setAuthMode("login");
+            authEmailEl.value = email;
+            authSubmitEl.disabled = false;
+            authSubmitEl.classList.remove("loading");
+            authSubmitEl.textContent = "Нэвтрэх";
+            renderTurnstile();
+        } else if (session) {
+            updateAuthUi(user);
+            closeAuthModal();
+            showAuthToast("Амжилттай бүртгэгдлээ.", "success");
+            redirectToDashboard();
+        } else {
+            showAuthToast(email + " хаяг руу баталгаажуулах имэйл илгээлээ. Имэйлээ шалгана уу.", "success");
+            authSubmitEl.disabled = false;
+            authSubmitEl.classList.remove("loading");
+            authSubmitEl.textContent = "Бүртгүүлэх";
+            resetTurnstile();
+        }
+    }
+}
+
+function bindHeaderAndAuth() {
+    authStatusEl = document.getElementById("auth-status");
+    authBtnEl = document.getElementById("auth-btn");
+    avatarMenuEl = document.getElementById("avatar-menu");
+    menuDashboardBtnEl = document.getElementById("menu-dashboard-btn");
+    menuLogoutBtnEl = document.getElementById("menu-logout-btn");
+    const themeToggle = document.getElementById("theme-toggle");
+    const themeIcon = document.getElementById("theme-icon");
+    const body = document.body;
+
+    authBtnEl.addEventListener("click", handleAuthButtonClick);
+    authStatusEl.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleAvatarMenu();
+    });
+    menuDashboardBtnEl.addEventListener("click", () => {
+        closeAvatarMenu();
+        redirectToDashboard();
+    });
+    menuLogoutBtnEl.addEventListener("click", async () => {
+        closeAvatarMenu();
+        await supabaseClient.auth.signOut();
+    });
+    document.addEventListener("click", (event) => {
+        if (!avatarMenuEl || !avatarMenuEl.classList.contains("open")) return;
+        if (!avatarMenuEl.contains(event.target) && event.target !== authStatusEl) {
+            closeAvatarMenu();
+        }
+    });
+    authFormEl.addEventListener("submit", handleAuthSubmit);
+    tabLoginEl.addEventListener("click", () => setAuthMode("login"));
+    tabRegisterEl.addEventListener("click", () => setAuthMode("register"));
+    authPasswordToggleEl.addEventListener("click", () => {
+        const isHidden = authPasswordEl.type === "password";
+        authPasswordEl.type = isHidden ? "text" : "password";
+        authPasswordToggleEl.innerHTML = isHidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+    });
+    authConfirmToggleEl.addEventListener("click", () => {
+        const isHidden = authConfirmPasswordEl.type === "password";
+        authConfirmPasswordEl.type = isHidden ? "text" : "password";
+        authConfirmToggleEl.innerHTML = isHidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+    });
+    authForgotEl.addEventListener("click", () => setAuthMode("forgot"));
+    authBackEl.addEventListener("click", () => setAuthMode("login"));
+    authCloseEl.addEventListener("click", closeAuthModal);
+    authModalEl.addEventListener("click", (event) => {
+        if (event.target === authModalEl) closeAuthModal();
+    });
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+        updateAuthUi(session?.user || null);
+    });
+    supabaseClient.auth.getSession().then(({ data }) => {
+        updateAuthUi(data?.session?.user || null);
+    });
+
+    themeToggle.addEventListener('click', () => {
+        if (body.getAttribute('data-theme') === 'dark') {
+            body.setAttribute('data-theme', 'light');
+            themeIcon.classList.replace('fa-sun', 'fa-moon');
+            localStorage.setItem('theme', 'light');
+        } else {
+            body.setAttribute('data-theme', 'dark');
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+            localStorage.setItem('theme', 'dark');
+        }
+    });
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        body.setAttribute('data-theme', 'light');
+        themeIcon.classList.replace('fa-sun', 'fa-moon');
+    }
+}
+
+loadHeader().then(bindHeaderAndAuth);
+
+const modal = document.getElementById("img-modal");
+const modalImg = document.getElementById("modal-img");
+const closeBtn = document.querySelector(".close");
+
+// wrapper дээр click барина
+document.querySelectorAll(".image-wrapper").forEach(wrapper => {
+    wrapper.addEventListener("click", () => {
+        const img = wrapper.querySelector("img");
+        if (!img) return;
+
+        modal.style.display = "flex"; // "block"-ын оронд "flex" болгосон
+        modalImg.src = img.src;
+    });
+});
+
+// хаах
+closeBtn.onclick = () => modal.style.display = "none";
+
+// background click
+modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+        modal.style.display = "none";
+    }
+});
+       // --- Typing Effect Logic ---
+const typingElement = document.getElementById("typing-p");
+
+const textPart1 = "Microsoft Word, PowerPoint дээр Монгол хэлээр алдаагүй, цэвэр ";
+const errorWord = "бичхэд";
+const correctWord = "бичихэд";
+const textPart2 = " тань тусална😎.";
+
+let state = "typing_all"; 
+let charIndex = 0;
+let deleteIndex = 0;
+
+const fullTextWithError = textPart1 + errorWord + textPart2;
+const fullCorrectText = textPart1 + correctWord + textPart2;
+
+function typeEffect() {
+    let speed = 50;
+
+    if (state === "typing_all") {
+        // 1. Алдаатай текст бичих
+        typingElement.innerHTML =
+            fullTextWithError.substring(0, charIndex + 1) +
+            `<span class="cursor"></span>`;
+        charIndex++;
+
+        if (charIndex >= fullTextWithError.length) {
+            state = "start_scan";
+            speed = 800;
+        }
+    }
+
+    else if (state === "start_scan") {
+        // 2. Scan эхлэх
+        typingElement.classList.add("scanning");
+        typingElement.innerHTML =
+            `<div class="scanner-bar"></div>` +
+            fullTextWithError +
+            `<span class="cursor"></span>`;
+
+        state = "scanning_active";
+        speed = 1400;
+    }
+
+    else if (state === "scanning_active") {
+        // 3. Алдаа илрүүлэх
+        typingElement.innerHTML =
+            textPart1 +
+            `<span class="misspelled">${errorWord}</span>` +
+            textPart2 +
+            `<span class="cursor"></span>`;
+
+        state = "moving_back";
+        speed = 700;
+    }
+
+    else if (state === "moving_back") {
+        // 4. Cursor буцах
+        typingElement.innerHTML =
+            textPart1 +
+            `<span class="misspelled">${errorWord}</span>` +
+            `<span class="cursor"></span>` +
+            textPart2;
+
+        state = "fixing";
+        speed = 900;
+    }
+
+    else if (state === "fixing") {
+        // 5. Засах
+        typingElement.innerHTML =
+            textPart1 +
+            `<span class="corrected">${correctWord}</span>` +
+            `<span class="cursor"></span>` +
+            textPart2;
+
+        state = "moving_forward";
+        speed = 700;
+    }
+
+    else if (state === "moving_forward") {
+        // 6. Төгсгөл
+        typingElement.innerHTML =
+            fullCorrectText +
+            `<span class="cursor"></span>`;
+
+        state = "pause_before_delete";
+        speed = 1500;
+    }
+
+    else if (state === "pause_before_delete") {
+        // 7. Delete эхлэх
+        deleteIndex = fullCorrectText.length;
+        state = "deleting";
+        speed = 40;
+    }
+
+    else if (state === "deleting") {
+    if (deleteIndex >= 0) {
+        typingElement.innerHTML =
+            fullCorrectText.substring(0, deleteIndex) +
+            `<span class="cursor"></span>`;
+        deleteIndex--;
+    } else {
+        // RESET 🔁
+        charIndex = 0;
+        state = "typing_all";
+        speed = 500;
+    }
+}
+
+    setTimeout(typeEffect, speed);
+}
+
+// Эхлүүлэх
+window.addEventListener("load", () => {
+    typingElement.style.position = "relative";
+    typeEffect();
+});
+       
+        // Зорилтот хугацаа: 2026-03-19-ны 20:00:00
+        const targetDate = new Date("2026-03-19T20:00:00").getTime(); 
+        const downloadUrl = "https://spellcheckermn.online/SpellCheckerMN.exe";
+
+        function launchConfetti() {
+            var duration = 5 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            function randomInRange(min, max) {
+              return Math.random() * (max - min) + min;
+            }
+
+            var interval = setInterval(function() {
+              var timeLeft = animationEnd - Date.now();
+
+              if (timeLeft <= 0) {
+                return clearInterval(interval);
+              }
+
+              var particleCount = 50 * (timeLeft / duration);
+              // Хоёр талаас буудах
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
+        const countdownEffect = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            const btnText = document.getElementById("btn-text");
+            
+            if (distance > 0) {
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                const d = days.toString().padStart(2, '0');
+                const h = hours.toString().padStart(2, '0');
+                const m = minutes.toString().padStart(2, '0');
+                const s = seconds.toString().padStart(2, '0');
+                
+                btnText.innerText = `${d}:${h}:${m}:${s}`;
+            } else {
+                // --- НЭЭЛТИЙН МӨЧ ---
+                clearInterval(countdownEffect);
+                const btn = document.getElementById("download-btn");
+                const btnIcon = document.getElementById("btn-icon");
+
+                btn.setAttribute("href", downloadUrl);
+                btn.classList.remove("disabled");
+                btn.style.pointerEvents = "auto";
+                
+                // Эффектүүд
+                btnIcon.classList.replace("fa-lock", "fa-cloud-download-alt");
+                btnText.innerText = "Татах";
+                
+                // 1. Өнгөт цаас буудуулах
+                launchConfetti();
+                
+                // 2. Товчлуурыг бага зэрэг "лугшдаг" болгох (Pulse effect)
+                btn.style.animation = "pulse 1.5s infinite";
+            }
+        }, 1000);
+
+        document.getElementById("download-btn").addEventListener("click", (event) => {
+            if (!currentUser) {
+                event.preventDefault();
+                alert("Татахын өмнө эхлээд нэвтэрнэ үү.");
+            }
+        });
+
+        // --- CSS дээр нэмэх Pulse анимаци ---
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); box-shadow: 0 0 20px var(--primary); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // --- Intersection Observer ---
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.step-item').forEach(el => observer.observe(el));
+       
+       // Modal logic
+
+    </script>
+	
+</body>
+</html>
