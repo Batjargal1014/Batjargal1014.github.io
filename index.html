@@ -12,25 +12,25 @@
             /* Light Mode */
             --primary: #4facfe;
             --secondary: #00f2fe;
-            --bg: #f8fafc;
-            --card-bg: rgba(255, 255, 255, 0.8);
-            --text-main: #1e293b;
-            --text-dim: #64748b;
+            --bg: #edf2f7;
+            --card-bg: rgba(248, 251, 255, 0.86);
+            --text-main: #1b2434;
+            --text-dim: #5d6c80;
             --accent: #38bdf8;
-            --image-wrapper-bg: #e2e8f0;
-            --border-color: rgba(0, 0, 0, 0.05);
-            --shadow: rgba(0, 0, 0, 0.1);
+            --image-wrapper-bg: #dbe5f1;
+            --border-color: rgba(15, 23, 42, 0.08);
+            --shadow: rgba(15, 23, 42, 0.12);
         }
 
         [data-theme="dark"] {
             /* Dark Mode */
-            --bg: #0b1120;
-            --card-bg: rgba(30, 41, 59, 0.5);
+            --bg: #0a1324;
+            --card-bg: rgba(22, 34, 54, 0.62);
             --text-main: #f1f5f9;
-            --text-dim: #94a3b8;
-            --image-wrapper-bg: #1e293b;
-            --border-color: rgba(255, 255, 255, 0.05);
-            --shadow: rgba(0, 0, 0, 0.5);
+            --text-dim: #9baac0;
+            --image-wrapper-bg: #1b2a43;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --shadow: rgba(1, 6, 16, 0.56);
         }
 
         * {
@@ -568,6 +568,69 @@
         justify-content: center;
         min-height: 65px;
     }
+    .otp-wrap {
+        display: none;
+    }
+    .otp-wrap.visible {
+        display: block;
+    }
+    .otp-label {
+        font-size: 0.85rem;
+        color: var(--text-dim);
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .otp-inputs {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+    .otp-inputs input {
+        width: 46px;
+        height: 52px;
+        text-align: center;
+        font-size: 1.3rem;
+        font-weight: 800;
+        border: 1px solid var(--border-color);
+        background: rgba(148, 163, 184, 0.12);
+        color: var(--text-main);
+        border-radius: 12px;
+        outline: none;
+        caret-color: var(--primary);
+    }
+    .otp-inputs input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+    }
+    .otp-resend {
+        text-align: center;
+        margin-top: 10px;
+    }
+    .otp-resend button {
+        background: transparent;
+        border: none;
+        color: var(--primary);
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0;
+    }
+    .otp-resend button:disabled {
+        color: var(--text-dim);
+        cursor: not-allowed;
+    }
+    .otp-resend button:not(:disabled):hover {
+        text-decoration: underline;
+    }
+    .auth-new-pw-wrap {
+        display: none;
+    }
+    .auth-new-pw-wrap.visible {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
     .auth-form-actions {
         margin-top: 6px;
         display: flex;
@@ -847,6 +910,30 @@
                 </div>
             </div>
             <button id="auth-forgot" class="auth-forgot-link" type="button">Нууц үг мартсан?</button>
+            <div id="otp-wrap" class="otp-wrap">
+                <span class="otp-label">Имэйлд ирсэн 6 оронтой кодыг оруулна уу</span>
+                <div class="otp-inputs" id="otp-inputs">
+                    <input type="text" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+                    <input type="text" maxlength="1" inputmode="numeric">
+                    <input type="text" maxlength="1" inputmode="numeric">
+                    <input type="text" maxlength="1" inputmode="numeric">
+                    <input type="text" maxlength="1" inputmode="numeric">
+                    <input type="text" maxlength="1" inputmode="numeric">
+                </div>
+                <div class="otp-resend">
+                    <button id="otp-resend-btn" type="button" disabled>Дахин илгээх (<span id="otp-timer">60</span>с)</button>
+                </div>
+            </div>
+            <div id="auth-new-pw-wrap" class="auth-new-pw-wrap">
+                <div class="auth-password-wrap">
+                    <input id="auth-new-password" class="auth-input" type="password" placeholder="Шинэ нууц үг" minlength="6">
+                    <button id="auth-new-pw-toggle" class="auth-password-toggle" type="button"><i class="fas fa-eye"></i></button>
+                </div>
+                <div class="auth-password-wrap">
+                    <input id="auth-new-pw-confirm" class="auth-input" type="password" placeholder="Нууц үг давтах" minlength="6">
+                    <button id="auth-new-pw-confirm-toggle" class="auth-password-toggle" type="button"><i class="fas fa-eye"></i></button>
+                </div>
+            </div>
             <div id="turnstile-container" class="turnstile-wrap"></div>
             <div id="auth-success" class="auth-success-msg" style="display:none;"></div>
             <div hidden id="auth-error" class="auth-error"></div>
@@ -860,6 +947,7 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./components/session-guard.js"></script>
    <script>
 const SUPABASE_URL = "https://irqjecjpfktyzoflrcdt.supabase.co";
 const SUPABASE_PUBLISHABLE_DEFAULT_KEY = "sb_publishable_9_26pSQbJ64aeYNZxTY8vA_-Rx0TNuf";
@@ -895,8 +983,20 @@ const authConfirmToggleEl = document.getElementById("auth-confirm-toggle");
 const authBackEl = document.getElementById("auth-back");
 const authSuccessEl = document.getElementById("auth-success");
 const authToastEl = document.getElementById("auth-toast");
+const otpWrapEl = document.getElementById("otp-wrap");
+const otpInputsEl = document.getElementById("otp-inputs");
+const otpInputs = otpInputsEl.querySelectorAll("input");
+const otpResendBtn = document.getElementById("otp-resend-btn");
+const otpTimerEl = document.getElementById("otp-timer");
+const authNewPwWrapEl = document.getElementById("auth-new-pw-wrap");
+const authNewPasswordEl = document.getElementById("auth-new-password");
+const authNewPwConfirmEl = document.getElementById("auth-new-pw-confirm");
+const authNewPwToggleEl = document.getElementById("auth-new-pw-toggle");
+const authNewPwConfirmToggleEl = document.getElementById("auth-new-pw-confirm-toggle");
 const DASHBOARD_PATH = "/dashboard";
 let authMode = "login";
+let pendingOtpEmail = "";
+let otpCountdown = null;
 let authToastTimer = null;
 
 function getHeaderPath() {
@@ -941,43 +1041,112 @@ function updateAuthUi(user) {
     closeAvatarMenu();
 }
 
+function hideAllAuthFields() {
+    authNameWrapEl.classList.remove("visible");
+    authConfirmWrapEl.classList.remove("visible");
+    otpWrapEl.classList.remove("visible");
+    authNewPwWrapEl.classList.remove("visible");
+    authEmailEl.style.display = "";
+    authPasswordWrapEl.style.display = "";
+    authPasswordEl.setAttribute("required", "");
+    authForgotEl.style.display = "none";
+    authBackEl.style.display = "none";
+    tabLoginEl.parentElement.style.display = "";
+    clearOtpInputs();
+    stopOtpTimer();
+}
+
+function clearOtpInputs() {
+    otpInputs.forEach(i => i.value = "");
+}
+
+function getOtpValue() {
+    return Array.from(otpInputs).map(i => i.value).join("");
+}
+
+function startOtpTimer() {
+    let sec = 60;
+    otpResendBtn.disabled = true;
+    otpTimerEl.textContent = sec;
+    otpResendBtn.innerHTML = 'Дахин илгээх (<span id="otp-timer">' + sec + '</span>с)';
+    if (otpCountdown) clearInterval(otpCountdown);
+    otpCountdown = setInterval(() => {
+        sec--;
+        const timerSpan = otpResendBtn.querySelector("span");
+        if (timerSpan) timerSpan.textContent = sec;
+        if (sec <= 0) {
+            clearInterval(otpCountdown);
+            otpCountdown = null;
+            otpResendBtn.disabled = false;
+            otpResendBtn.textContent = "Дахин илгээх";
+        }
+    }, 1000);
+}
+
+function stopOtpTimer() {
+    if (otpCountdown) { clearInterval(otpCountdown); otpCountdown = null; }
+}
+
 function setAuthMode(mode) {
     authMode = mode;
-    const isLogin = mode === "login";
-    const isForgot = mode === "forgot";
-
     authErrorEl.textContent = "";
     authSuccessEl.style.display = "none";
     authSuccessEl.textContent = "";
     authSubmitEl.disabled = false;
     authSubmitEl.classList.remove("loading");
+    hideAllAuthFields();
 
-    if (isForgot) {
+    if (mode === "forgot") {
         authTitleEl.textContent = "Нууц үг сэргээх";
         authSubtitleEl.textContent = "Бүртгэлтэй имэйл хаягаа оруулна уу.";
-        authSubmitEl.textContent = "Сэргээх имэйл илгээх";
+        authSubmitEl.textContent = "Код илгээх";
         authPasswordWrapEl.style.display = "none";
         authPasswordEl.removeAttribute("required");
-        authNameWrapEl.classList.remove("visible");
-        authConfirmWrapEl.classList.remove("visible");
-        authForgotEl.style.display = "none";
         authBackEl.style.display = "";
         tabLoginEl.parentElement.style.display = "none";
         return;
     }
 
-    authPasswordWrapEl.style.display = "";
-    authPasswordEl.setAttribute("required", "");
+    if (mode === "otp-signup") {
+        authTitleEl.textContent = "Имэйл баталгаажуулалт";
+        authSubtitleEl.textContent = pendingOtpEmail + " хаяг руу код илгээлээ.";
+        authSubmitEl.textContent = "Баталгаажуулах";
+        authEmailEl.style.display = "none";
+        authPasswordWrapEl.style.display = "none";
+        authPasswordEl.removeAttribute("required");
+        otpWrapEl.classList.add("visible");
+        authBackEl.style.display = "";
+        tabLoginEl.parentElement.style.display = "none";
+        startOtpTimer();
+        setTimeout(() => otpInputs[0].focus(), 100);
+        return;
+    }
+
+    if (mode === "otp-recovery") {
+        authTitleEl.textContent = "Нууц үг шинэчлэх";
+        authSubtitleEl.textContent = pendingOtpEmail + " хаяг руу код илгээлээ.";
+        authSubmitEl.textContent = "Шинэчлэх";
+        authEmailEl.style.display = "none";
+        authPasswordWrapEl.style.display = "none";
+        authPasswordEl.removeAttribute("required");
+        otpWrapEl.classList.add("visible");
+        authNewPwWrapEl.classList.add("visible");
+        authBackEl.style.display = "";
+        tabLoginEl.parentElement.style.display = "none";
+        startOtpTimer();
+        setTimeout(() => otpInputs[0].focus(), 100);
+        return;
+    }
+
+    const isLogin = mode === "login";
     authForgotEl.style.display = isLogin ? "" : "none";
-    authBackEl.style.display = "none";
-    tabLoginEl.parentElement.style.display = "";
     authNameWrapEl.classList.toggle("visible", !isLogin);
     authConfirmWrapEl.classList.toggle("visible", !isLogin);
 
     authTitleEl.textContent = isLogin ? "Нэвтрэх" : "Бүртгүүлэх";
     authSubtitleEl.textContent = isLogin
         ? "Бүртгэлтэй бол нэвтэрч үргэлжлүүлнэ үү."
-        : "Бүртгэлгүй бол бүртгүүлж имэйл хаягаа баталгаажуулна уу.";
+        : "Шинэ бүртгэл үүсгээд шууд эхлээрэй.";
     authSubmitEl.textContent = isLogin ? "Нэвтрэх" : "Бүртгүүлэх";
     tabLoginEl.classList.toggle("active", isLogin);
     tabRegisterEl.classList.toggle("active", !isLogin);
@@ -1029,6 +1198,17 @@ function closeAuthModal() {
     authConfirmPasswordEl.value = "";
     authConfirmPasswordEl.type = "password";
     authConfirmToggleEl.innerHTML = '<i class="fas fa-eye"></i>';
+    otpWrapEl.classList.remove("visible");
+    authNewPwWrapEl.classList.remove("visible");
+    clearOtpInputs();
+    stopOtpTimer();
+    pendingOtpEmail = "";
+    authNewPasswordEl.value = "";
+    authNewPwConfirmEl.value = "";
+    authNewPasswordEl.type = "password";
+    authNewPwConfirmEl.type = "password";
+    authNewPwToggleEl.innerHTML = '<i class="fas fa-eye"></i>';
+    authNewPwConfirmToggleEl.innerHTML = '<i class="fas fa-eye"></i>';
     if (typeof turnstile !== "undefined" && turnstileWidgetId !== null) {
         turnstile.remove(turnstileWidgetId);
         turnstileWidgetId = null;
@@ -1081,10 +1261,121 @@ async function handleAuthButtonClick() {
     openAuthModal("login");
 }
 
+async function handleOtpSignup() {
+    const token = getOtpValue();
+    if (token.length !== 6) {
+        showAuthToast("6 оронтой кодыг бүрэн оруулна уу.", "error");
+        return;
+    }
+    authSubmitEl.disabled = true;
+    authSubmitEl.classList.add("loading");
+    authSubmitEl.textContent = "Баталгаажуулж байна...";
+
+    const { data, error } = await supabaseClient.auth.verifyOtp({
+        email: pendingOtpEmail,
+        token,
+        type: "signup"
+    });
+
+    authSubmitEl.disabled = false;
+    authSubmitEl.classList.remove("loading");
+    authSubmitEl.textContent = "Баталгаажуулах";
+
+    if (error) {
+        showAuthToast(error.message.includes("expired") ? "Кодын хугацаа дууссан. Дахин илгээнэ үү." : "Код буруу байна.", "error");
+        clearOtpInputs();
+        otpInputs[0].focus();
+        return;
+    }
+
+    const user = data?.user || data?.session?.user || null;
+    const session = data?.session || null;
+    if (user) {
+        await window.SessionGuard.saveCurrentSession(supabaseClient, user.id, session);
+        updateAuthUi(user);
+        closeAuthModal();
+        showAuthToast("Бүртгэл амжилттай баталгаажлаа!", "success");
+        redirectToDashboard();
+    }
+}
+
+async function handleOtpRecovery() {
+    const token = getOtpValue();
+    if (token.length !== 6) {
+        showAuthToast("6 оронтой кодыг бүрэн оруулна уу.", "error");
+        return;
+    }
+    const newPw = authNewPasswordEl.value;
+    const confirmPw = authNewPwConfirmEl.value;
+    if (!newPw || newPw.length < 6) {
+        showAuthToast("Нууц үг хамгийн багадаа 6 тэмдэгт байх ёстой.", "error");
+        return;
+    }
+    if (newPw !== confirmPw) {
+        showAuthToast("Нууц үг таарахгүй байна.", "error");
+        return;
+    }
+
+    authSubmitEl.disabled = true;
+    authSubmitEl.classList.add("loading");
+    authSubmitEl.textContent = "Шинэчилж байна...";
+
+    const { error: verifyError } = await supabaseClient.auth.verifyOtp({
+        email: pendingOtpEmail,
+        token,
+        type: "recovery"
+    });
+
+    if (verifyError) {
+        authSubmitEl.disabled = false;
+        authSubmitEl.classList.remove("loading");
+        authSubmitEl.textContent = "Шинэчлэх";
+        showAuthToast(verifyError.message.includes("expired") ? "Кодын хугацаа дууссан." : "Код буруу байна.", "error");
+        clearOtpInputs();
+        otpInputs[0].focus();
+        return;
+    }
+
+    const { error: updateError } = await supabaseClient.auth.updateUser({ password: newPw });
+
+    authSubmitEl.disabled = false;
+    authSubmitEl.classList.remove("loading");
+    authSubmitEl.textContent = "Шинэчлэх";
+
+    if (updateError) {
+        showAuthToast(updateError.message, "error");
+        return;
+    }
+
+    closeAuthModal();
+    showAuthToast("Нууц үг амжилттай шинэчлэгдлээ!", "success");
+}
+
+async function resendOtp() {
+    if (!pendingOtpEmail) return;
+    otpResendBtn.disabled = true;
+
+    if (authMode === "otp-signup") {
+        const { error } = await supabaseClient.auth.resend({ type: "signup", email: pendingOtpEmail });
+        if (error) { showAuthToast(error.message, "error"); return; }
+    } else {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(pendingOtpEmail);
+        if (error) { showAuthToast(error.message, "error"); return; }
+    }
+
+    showAuthToast("Код дахин илгээлээ.", "success");
+    clearOtpInputs();
+    startOtpTimer();
+}
+
 async function handleAuthSubmit(event) {
     event.preventDefault();
     authErrorEl.textContent = "";
     authSuccessEl.style.display = "none";
+
+    if (authMode === "otp-signup") { return handleOtpSignup(); }
+    if (authMode === "otp-recovery") { return handleOtpRecovery(); }
+
     const email = authEmailEl.value.trim();
 
     const captchaToken = getCaptchaToken();
@@ -1099,23 +1390,21 @@ async function handleAuthSubmit(event) {
         authSubmitEl.classList.add("loading");
         authSubmitEl.textContent = "Илгээж байна...";
 
-        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + "/reset-password",
-            captchaToken
-        });
-
-        authSubmitEl.disabled = false;
-        authSubmitEl.classList.remove("loading");
-        authSubmitEl.textContent = "Сэргээх имэйл илгээх";
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { captchaToken });
 
         if (error) {
+            authSubmitEl.disabled = false;
+            authSubmitEl.classList.remove("loading");
+            authSubmitEl.textContent = "Код илгээх";
             showAuthToast(error.message, "error");
             resetTurnstile();
             return;
         }
 
-        showAuthToast(email + " хаяг руу нууц үг сэргээх холбоос илгээлээ.", "success");
-        resetTurnstile();
+        pendingOtpEmail = email;
+        setAuthMode("otp-recovery");
+        renderTurnstile();
+        showAuthToast(email + " хаяг руу код илгээлээ.", "success");
         return;
     }
 
@@ -1129,6 +1418,7 @@ async function handleAuthSubmit(event) {
             return;
         }
     }
+
     authSubmitEl.disabled = true;
     authSubmitEl.classList.add("loading");
     authSubmitEl.textContent = authMode === "login" ? "Нэвтэрч байна..." : "Бүртгэж байна...";
@@ -1153,11 +1443,15 @@ async function handleAuthSubmit(event) {
     if (error) {
         const msg = (error.message || "").toLowerCase();
         if (msg.includes("email rate limit exceeded") || msg.includes("rate limit")) {
-            showAuthToast("Хэт олон удаа оролдлоо. Имэйлээ шалгаж баталгаажуулна уу.", "error");
+            showAuthToast("Хэт олон удаа оролдлоо. Түр хүлээнэ үү.", "error");
         } else if (msg.includes("invalid login credentials")) {
             showAuthToast("Имэйл эсвэл нууц үг буруу байна.", "error");
         } else if (msg.includes("email not confirmed")) {
-            showAuthToast("Имэйл хаягаа баталгаажуулна уу. Ирсэн имэйлээ шалгана уу.", "error");
+            pendingOtpEmail = email;
+            setAuthMode("otp-signup");
+            renderTurnstile();
+            showAuthToast("Имэйлээ баталгаажуулна уу. Код илгээлээ.", "info");
+            return;
         } else {
             showAuthToast(error.message, "error");
         }
@@ -1173,6 +1467,7 @@ async function handleAuthSubmit(event) {
 
     if (authMode === "login") {
         if (user) {
+            await window.SessionGuard.saveCurrentSession(supabaseClient, user.id, session);
             updateAuthUi(user);
             closeAuthModal();
             showAuthToast("Амжилттай нэвтэрлээ.", "success");
@@ -1190,12 +1485,9 @@ async function handleAuthSubmit(event) {
         const isExistingUser = hasEmptyIdentities || isOldUser;
 
         if (isExistingUser) {
-            showAuthToast("Энэ имэйл хаягаар бүртгэл аль хэдийн үүссэн байна. Нэвтрэнэ үү.", "error");
+            showAuthToast("Энэ имэйл хаягаар бүртгэл аль хэдийн үүссэн байна.", "error");
             setAuthMode("login");
             authEmailEl.value = email;
-            authSubmitEl.disabled = false;
-            authSubmitEl.classList.remove("loading");
-            authSubmitEl.textContent = "Нэвтрэх";
             renderTurnstile();
         } else if (session) {
             updateAuthUi(user);
@@ -1203,11 +1495,10 @@ async function handleAuthSubmit(event) {
             showAuthToast("Амжилттай бүртгэгдлээ.", "success");
             redirectToDashboard();
         } else {
-            showAuthToast(email + " хаяг руу баталгаажуулах имэйл илгээлээ. Имэйлээ шалгана уу.", "success");
-            authSubmitEl.disabled = false;
-            authSubmitEl.classList.remove("loading");
-            authSubmitEl.textContent = "Бүртгүүлэх";
-            resetTurnstile();
+            pendingOtpEmail = email;
+            setAuthMode("otp-signup");
+            renderTurnstile();
+            showAuthToast(email + " хаяг руу баталгаажуулах код илгээлээ.", "success");
         }
     }
 }
@@ -1254,17 +1545,85 @@ function bindHeaderAndAuth() {
         authConfirmPasswordEl.type = isHidden ? "text" : "password";
         authConfirmToggleEl.innerHTML = isHidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
     });
+    authNewPwToggleEl.addEventListener("click", () => {
+        const isHidden = authNewPasswordEl.type === "password";
+        authNewPasswordEl.type = isHidden ? "text" : "password";
+        authNewPwToggleEl.innerHTML = isHidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+    });
+    authNewPwConfirmToggleEl.addEventListener("click", () => {
+        const isHidden = authNewPwConfirmEl.type === "password";
+        authNewPwConfirmEl.type = isHidden ? "text" : "password";
+        authNewPwConfirmToggleEl.innerHTML = isHidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+    });
+
+    otpInputs.forEach((inp, idx) => {
+        inp.addEventListener("input", (e) => {
+            const val = e.target.value.replace(/\D/g, "");
+            e.target.value = val.slice(0, 1);
+            if (val && idx < otpInputs.length - 1) otpInputs[idx + 1].focus();
+        });
+        inp.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" && !inp.value && idx > 0) otpInputs[idx - 1].focus();
+        });
+        inp.addEventListener("paste", (e) => {
+            e.preventDefault();
+            const paste = (e.clipboardData.getData("text") || "").replace(/\D/g, "").slice(0, 6);
+            paste.split("").forEach((ch, i) => { if (otpInputs[i]) otpInputs[i].value = ch; });
+            const next = Math.min(paste.length, otpInputs.length - 1);
+            otpInputs[next].focus();
+        });
+    });
+
+    otpResendBtn.addEventListener("click", resendOtp);
+
     authForgotEl.addEventListener("click", () => setAuthMode("forgot"));
-    authBackEl.addEventListener("click", () => setAuthMode("login"));
+    authBackEl.addEventListener("click", () => {
+        if (authMode === "otp-signup" || authMode === "otp-recovery") {
+            pendingOtpEmail = "";
+            setAuthMode("login");
+            renderTurnstile();
+        } else {
+            setAuthMode("login");
+        }
+    });
     authCloseEl.addEventListener("click", closeAuthModal);
     authModalEl.addEventListener("click", (event) => {
         if (event.target === authModalEl) closeAuthModal();
     });
-    supabaseClient.auth.onAuthStateChange((_event, session) => {
-        updateAuthUi(session?.user || null);
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        const user = session?.user || null;
+        if (!session || !user) {
+            updateAuthUi(null);
+            return;
+        }
+        if (event === "SIGNED_IN") {
+            await window.SessionGuard.saveCurrentSession(supabaseClient, user.id, session);
+            updateAuthUi(user);
+            return;
+        }
+        const isValid = await window.SessionGuard.isCurrentSessionValid(supabaseClient, user.id, session);
+        if (!isValid) {
+            await supabaseClient.auth.signOut({ scope: "local" });
+            updateAuthUi(null);
+            showAuthToast("Өөр төхөөрөмжөөс нэвтэрсэн тул та гарлаа.", "info");
+            return;
+        }
+        updateAuthUi(user);
     });
-    supabaseClient.auth.getSession().then(({ data }) => {
-        updateAuthUi(data?.session?.user || null);
+    supabaseClient.auth.getSession().then(async ({ data }) => {
+        const session = data?.session || null;
+        const user = session?.user || null;
+        if (!session || !user) {
+            updateAuthUi(null);
+            return;
+        }
+        const isValid = await window.SessionGuard.isCurrentSessionValid(supabaseClient, user.id, session);
+        if (!isValid) {
+            await supabaseClient.auth.signOut({ scope: "local" });
+            updateAuthUi(null);
+            return;
+        }
+        updateAuthUi(user);
     });
 
     themeToggle.addEventListener('click', () => {
